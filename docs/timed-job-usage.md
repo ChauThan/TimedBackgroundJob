@@ -1,4 +1,46 @@
 # Timed Background Job Library Usage
+## Example: Registering HelloWorldJob and TimeLoggerJob
+
+In your example project, register both jobs in `Program.cs`:
+
+```csharp
+services.AddTimedJob<HelloWorldJob>(options =>
+{
+    options.Interval = TimeSpan.FromSeconds(10);
+    options.Name = "HelloWorldJob";
+});
+services.AddTimedJob<TimeLoggerJob>(options =>
+{
+    options.Interval = TimeSpan.FromSeconds(15);
+    options.Name = "TimeLoggerJob";
+});
+```
+
+## Example Job Implementations
+
+`HelloWorldJob.cs`:
+```csharp
+public class HelloWorldJob : ITimedJob
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Hello, World! The time is {DateTime.Now:HH:mm:ss}");
+        return Task.CompletedTask;
+    }
+}
+```
+
+`TimeLoggerJob.cs`:
+```csharp
+public class TimeLoggerJob : ITimedJob
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Current time logged: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        return Task.CompletedTask;
+    }
+}
+```
 
 ## Registering a Timed Job
 
