@@ -23,13 +23,13 @@ namespace TimedBackgroundJob.Tests
             await service.StopAsync(CancellationToken.None);
 
             // Assert: Verify that the logger was called with an error log for the failing job.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             loggerMock.Verify(
                 x => x.Log(
                     Moq.It.Is<LogLevel>(level => level == LogLevel.Error),
                     Moq.It.IsAny<EventId>(),
                     Moq.It.Is<Moq.It.IsAnyType>((v, t) =>
                         v != null &&
-                        v.ToString() != null &&
                         v.ToString().Contains("Error executing timed job") &&
                         v.ToString().Contains("FailingJob")
                     ),
@@ -39,6 +39,7 @@ namespace TimedBackgroundJob.Tests
                 Moq.Times.AtLeastOnce,
                 "Expected error log for FailingJob was not found."
             );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             // The test passes if the error is logged and no unhandled exceptions occur.
         }
     }

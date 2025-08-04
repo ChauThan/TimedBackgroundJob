@@ -44,9 +44,9 @@ namespace TimedBackgroundJob.Tests
             services.AddTimedJobsFromAttributes(new[] { typeof(SampleJob).Assembly });
             var provider = services.BuildServiceProvider();
             var registry = provider.GetService<TimedJobRegistry>();
-            var reg = registry.Registrations.First(r => r.JobType == typeof(SampleJob));
-            Assert.Equal(TimeSpan.FromMinutes(15), reg.Options.Interval);
-            Assert.False(reg.Options.PreventOverlap);
+            var reg = registry?.Registrations.First(r => r.JobType == typeof(SampleJob));
+            Assert.Equal(TimeSpan.FromMinutes(15), reg?.Options.Interval);
+            Assert.False(reg?.Options.PreventOverlap);
         }
     }
 }
