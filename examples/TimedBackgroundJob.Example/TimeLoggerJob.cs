@@ -5,6 +5,7 @@ using TimedBackgroundJob;
 
 namespace TimedBackgroundJob.Example
 {
+    [TimedJob(15, true)]
     public class TimeLoggerJob : ITimedJob
     {
         public Task ExecuteAsync(CancellationToken cancellationToken)

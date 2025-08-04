@@ -5,12 +5,14 @@ using TimedBackgroundJob;
 
 namespace TimedBackgroundJob.Example
 {
-    [TimedJob(10, true)]
-    public class HelloWorldJob : ITimedJob
+    /// <summary>
+    /// A manually registered job for demonstration purposes.
+    /// </summary>
+    public class ManualJob : ITimedJob
     {
         public Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Hello, World! The time is {DateTime.Now:HH:mm:ss}");
+            Console.WriteLine($"ManualJob executed at {DateTime.Now:HH:mm:ss}");
             return Task.CompletedTask;
         }
     }

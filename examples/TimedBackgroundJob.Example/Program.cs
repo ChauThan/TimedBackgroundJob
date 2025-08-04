@@ -1,3 +1,6 @@
+using System;
+using Microsoft.Extensions.Hosting;
+
 namespace TimedBackgroundJob.Example
 {
     public class Program
@@ -7,14 +10,18 @@ namespace TimedBackgroundJob.Example
             var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((context, services) =>
                 {
+                    // Manual registration example
                     services.AddTimedJob<HelloWorldJob>(options =>
                     {
                         options.Interval = TimeSpan.FromSeconds(10);
                     });
-                    services.AddTimedJob<TimeLoggerJob>(options =>
+                    // Register a new job manually
+                    services.AddTimedJob<ManualJob>(options =>
                     {
-                        options.Interval = TimeSpan.FromSeconds(15);
+                        options.Interval = TimeSpan.FromSeconds(20);
                     });
+                    // Attribute-based registration example
+                    services.AddTimedJobsFromAttributes(new[] { typeof(Program).Assembly });
                 })
                 .Build();
 
