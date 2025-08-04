@@ -17,7 +17,7 @@ namespace TimedBackgroundJob
         {
             var options = new TimedJobOptions();
             configureOptions?.Invoke(options);
-            services.AddSingleton<ITimedJob, TJob>();
+            services.AddSingleton<TJob>();
             services.AddSingleton<TimedJobRegistration>(sp => new TimedJobRegistration(typeof(TJob), options));
 
             // Ensure registry and hosted service are registered only once
