@@ -2,6 +2,12 @@
 
 ![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
 
+<!-- CI/CD Status Badges -->
+![CI](https://github.com/ChauThan/TimedBackgroundJob/actions/workflows/ci.yml/badge.svg)
+![Release](https://github.com/ChauThan/TimedBackgroundJob/actions/workflows/release.yml/badge.svg)
+
+> **CI/CD:** Automated build, test, and NuGet publishing via GitHub Actions. See `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
+
 A robust .NET library for scheduling and running background jobs at timed intervals. Designed for reliability, extensibility, and ease of integration into ASP.NET Core applications.
 
 ## Features
