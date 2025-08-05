@@ -20,10 +20,26 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+      - name: Extract git tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0 || echo "")
+          echo "Git tag: $TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - name: Fail if no valid tag for release build
+        if: github.ref_type == 'tag' && steps.get_tag.outputs.tag == ''
+        run: |
+          echo "No valid git tag found for release build. Failing."
+          exit 1
       - name: Restore dependencies
         run: dotnet restore TimedBackgroundJob.sln
-      - name: Build solution
-        run: dotnet build TimedBackgroundJob.sln --configuration Release --no-restore
+      - name: Build solution (inject version if tag present)
+        run: |
+          if [ "${{ steps.get_tag.outputs.tag }}" != "" ]; then \
+            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore /p:Version=${{ steps.get_tag.outputs.tag }}; \
+          else \
+            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore; \
+          fi
       - name: Run tests
         run: dotnet test TimedBackgroundJob.sln --configuration Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory "TestResults"
       - name: Upload test results
