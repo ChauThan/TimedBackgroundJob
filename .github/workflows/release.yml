@@ -31,10 +31,3 @@ jobs:
           files: ./artifacts/*.nupkg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Commit version update
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add Directory.Build.props
-          git commit -m "Update version to $TAG_VERSION-release after tag"
-          git push
