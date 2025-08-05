@@ -1,0 +1,39 @@
+name: Release Version
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Update version in build file
+        run: |
+          TAG_VERSION=$(echo ${{ github.ref }} | sed 's/refs\/tags\/v//')
+          sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${TAG_VERSION}<\/VersionPrefix>/" Directory.Build.props
+          sed -i "s/<VersionSuffix>.*<\/VersionSuffix>/<VersionSuffix>release<\/VersionSuffix>/" Directory.Build.props
+      
+      - name: Build and pack
+        run: dotnet pack --configuration Release --output ./artifacts
+
+      - name: Upload release artifacts to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version update
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add Directory.Build.props
+          git commit -m "Update version to $TAG_VERSION-release after tag"
+          git push

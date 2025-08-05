@@ -1,6 +1,7 @@
 # TimedBackgroundJob
 
 ![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![NuGet Version](https://img.shields.io/badge/version-0.0.1--alpha-blue)
 
 <!-- CI/CD Status Badges -->
 ![CI](https://github.com/ChauThan/TimedBackgroundJob/actions/workflows/ci.yml/badge.svg)
@@ -21,6 +22,10 @@ A robust .NET library for scheduling and running background jobs at timed interv
 ## Architecture Overview
 
 TimedBackgroundJob uses a registry to discover and manage jobs marked with `[TimedJob]` attributes. Jobs are executed by a hosted service, with options for concurrency control and error management.
+
+## Current Version
+
+The current version of TimedBackgroundJob is **0.0.1-alpha**. Versioning is managed via the build file (`Directory.Build.props`) and CI/CD automation. Pre-release versions are supported and published automatically after each release tag.
 
 ## Setup Instructions
 
