@@ -20,12 +20,22 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-      - name: Extract git tag
+      - name: Extract git tag (cross-platform)
         id: get_tag
+        shell: bash
         run: |
-          TAG=$(git describe --tags --abbrev=0 || echo "")
-          echo "Git tag: $TAG"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            pwsh -Command "
+              $tag = git describe --tags --abbrev=0 2>$null
+              if (-not $tag) { $tag = '' }
+              Write-Host \"Git tag: $tag\"
+              echo \"tag=$tag\" >> $env:GITHUB_OUTPUT
+            "
+          else
+            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            echo "Git tag: $TAG"
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+          fi
       - name: Fail if no valid tag for release build
         if: github.ref_type == 'tag' && steps.get_tag.outputs.tag == ''
         run: |
