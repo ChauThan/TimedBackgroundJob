@@ -1,0 +1,97 @@
+# TimedBackgroundJob
+
+![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+
+A robust .NET library for scheduling and running background jobs at timed intervals. Designed for reliability, extensibility, and ease of integration into ASP.NET Core applications.
+
+## Features
+
+- Attribute-based job scheduling
+- Hosted service for background execution
+- Overlap prevention and error handling
+- Extensible job registry
+- Example and test projects included
+
+## Architecture Overview
+
+TimedBackgroundJob uses a registry to discover and manage jobs marked with `[TimedJob]` attributes. Jobs are executed by a hosted service, with options for concurrency control and error management.
+
+## Setup Instructions
+
+### Prerequisites
+- .NET 9.0 SDK or later
+
+### Build Steps
+
+```pwsh
+# Clone the repository
+$ git clone https://github.com/ChauThan/TimedBackgroundJob.git
+cd TimedBackgroundJob
+
+# Restore dependencies
+$ dotnet restore
+
+# Build the solution
+$ dotnet build
+
+# Run tests
+$ dotnet test
+```
+
+## Usage Examples
+
+### Library Integration
+
+Add the NuGet package or reference the project, then register jobs in your ASP.NET Core app:
+
+```csharp
+// Startup.cs or Program.cs
+services.AddTimedJobs();
+```
+
+Define a job:
+
+```csharp
+using TimedBackgroundJob;
+
+[TimedJob("*/5 * * * *")] // Runs every 5 minutes
+public class MyJob : ITimedJob
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        // Job logic here
+        return Task.CompletedTask;
+    }
+}
+```
+
+### Example Project
+
+See `examples/TimedBackgroundJob.Example/` for sample jobs and usage patterns. Run the example:
+
+```pwsh
+cd examples/TimedBackgroundJob.Example
+$ dotnet run
+```
+
+## Contribution Guidelines
+
+Contributions are welcome! Please review the [code of conduct](https://github.com/ChauThan/TimedBackgroundJob/blob/main/CODE_OF_CONDUCT.md) and submit pull requests with clear descriptions.
+
+- Fork the repository
+- Create a feature branch
+- Submit a pull request
+
+## License
+
+This project is licensed under the terms of the [LICENSE](./LICENSE) file.
+
+## Documentation & Further Reading
+
+- [Usage Guide](./docs/timed-job-usage.md)
+- [.NET Documentation](https://docs.microsoft.com/en-us/dotnet/)
+- [GitHub Markdown Guide](https://guides.github.com/features/mastering-markdown/)
+
+---
+
+For questions or support, please open an issue on GitHub.
