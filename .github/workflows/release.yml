@@ -23,9 +23,7 @@ jobs:
       - name: Pack NuGet package
         run: dotnet pack src/TimedBackgroundJob/TimedBackgroundJob.csproj --configuration Release --no-build --output ./nupkg
       - name: Publish to GitHub Packages
-        run: dotnet nuget push ./nupkg/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish to NuGet.org
-        run: dotnet nuget push ./nupkg/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/ChauThan/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
       - name: Notify success
         if: success()
         run: echo "NuGet package published successfully."
