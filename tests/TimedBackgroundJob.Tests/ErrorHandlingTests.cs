@@ -10,9 +10,9 @@ namespace TimedBackgroundJob.Tests
         public async Task HandlesJobErrorGracefully()
         {
             // Arrange: Set up registry with a failing job and a mock logger to capture error logs.
-            var registry = new TimedJobRegistry(new List<TimedJobRegistration>());
+            var registry = new TimedJobRegistry(new List<TypeJobRegistration>());
             var options = new TimedJobOptions { Interval = TimeSpan.FromMilliseconds(50) };
-            registry.Add(new TimedJobRegistration(typeof(FailingJob), options));
+            registry.Add(new TypeJobRegistration(typeof(FailingJob), options));
             var scopeFactory = new Moq.Mock<Microsoft.Extensions.DependencyInjection.IServiceScopeFactory>().Object;
             var loggerMock = new Moq.Mock<ILogger<TimedJobHostedService>>();
             var service = new TimedJobHostedService(scopeFactory, registry, loggerMock.Object);

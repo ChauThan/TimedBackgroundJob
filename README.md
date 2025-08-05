@@ -39,6 +39,23 @@ $ dotnet test
 ```
 
 ## Usage Examples
+### Delegate-Based Job Registration
+
+You can register a timed job using a delegate for inline logic and DI access:
+
+```csharp
+services.AddTimedJob(options =>
+{
+    options.Interval = TimeSpan.FromMinutes(10);
+    options.Name = "DelegateJob";
+},
+(serviceProvider) =>
+{
+    var logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger("DelegateJob");
+    logger?.LogInformation($"Delegate job executed at {DateTime.Now:HH:mm:ss}");
+    return Task.CompletedTask;
+});
+```
 
 ### Library Integration
 

@@ -17,7 +17,7 @@ namespace TimedBackgroundJob.Tests
             scopeMock.Setup(x => x.ServiceProvider).Returns(providerMock.Object);
             var scopeFactoryMock = new Moq.Mock<Microsoft.Extensions.DependencyInjection.IServiceScopeFactory>();
             scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
-            var registrations = new[] { new TimedJobRegistration(typeof(CustomJob), options) };
+            var registrations = new[] { new TypeJobRegistration(typeof(CustomJob), options) };
             var registry = new TimedJobRegistry(registrations);
             var logger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<TimedJobHostedService>>().Object;
             var service = new TimedJobHostedService(scopeFactoryMock.Object, registry, logger);

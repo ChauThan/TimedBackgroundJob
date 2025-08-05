@@ -21,7 +21,7 @@ namespace TimedBackgroundJob.Tests
             var registry = provider.GetService<TimedJobRegistry>();
             Assert.NotNull(registry);
             // Should only be one registration for SampleJob
-            Assert.Equal(1, registry.Registrations.Count(r => r.JobType == typeof(SampleJob)));
+            Assert.Equal(1, registry.Registrations.Count(r => r is TypeJobRegistration tjr && tjr.JobType == typeof(SampleJob)));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace TimedBackgroundJob.Tests
             var provider = services.BuildServiceProvider();
             var registry = provider.GetService<TimedJobRegistry>();
             Assert.NotNull(registry);
-            Assert.Contains(registry.Registrations, r => r.JobType == typeof(SampleJob));
+            Assert.Contains(registry.Registrations, r => r is TypeJobRegistration tjr && tjr.JobType == typeof(SampleJob));
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace TimedBackgroundJob.Tests
             services.AddTimedJobsFromAttributes(new[] { typeof(SampleJob).Assembly });
             var provider = services.BuildServiceProvider();
             var registry = provider.GetService<TimedJobRegistry>();
-            var reg = registry?.Registrations.First(r => r.JobType == typeof(SampleJob));
+            var reg = registry?.Registrations.FirstOrDefault(r => r is TypeJobRegistration tjr && tjr.JobType == typeof(SampleJob)) as TypeJobRegistration;
             Assert.Equal(TimeSpan.FromMinutes(15), reg?.Options.Interval);
             Assert.False(reg?.Options.PreventOverlap);
         }

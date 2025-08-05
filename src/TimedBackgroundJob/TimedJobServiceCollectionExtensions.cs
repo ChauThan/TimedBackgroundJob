@@ -19,19 +19,26 @@ namespace TimedBackgroundJob
             var options = new TimedJobOptions();
             configureOptions?.Invoke(options);
             services.AddSingleton<TJob>();
-            services.AddSingleton<TimedJobRegistration>(sp => new TimedJobRegistration(typeof(TJob), options));
-
-            // Ensure registry and hosted service are registered only once
-            var alreadyRegistered = services.Any(sd => sd.ServiceType == typeof(TimedJobRegistry));
-            if (!alreadyRegistered)
-            {
-                services.AddSingleton<TimedJobRegistry>(sp =>
-                {
-                    var registrations = sp.GetServices<TimedJobRegistration>();
-                    return new TimedJobRegistry(registrations);
-                });
-                services.AddHostedService<TimedJobHostedService>();
-            }
+            services.AddSingleton<TimedJobRegistration>(sp => new TypeJobRegistration(typeof(TJob), options));
+            EnsureRegistryAndHostedServiceRegistered(services);
+            return services;
+        }
+        /// <summary>
+        /// Registers a timed background job using a delegate for job logic.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configureOptions">Options configuration delegate.</param>
+        /// <param name="jobDelegate">Delegate containing job logic, receives IServiceProvider.</param>
+        /// <returns>The updated service collection.</returns>
+        public static IServiceCollection AddTimedJob(
+            this IServiceCollection services,
+            Action<TimedJobOptions> configureOptions,
+            Func<IServiceProvider, Task> jobDelegate)
+        {
+            var options = new TimedJobOptions();
+            configureOptions?.Invoke(options);
+            services.AddSingleton<TimedJobRegistration>(sp => new DelegateJobRegistration(jobDelegate, options));
+            EnsureRegistryAndHostedServiceRegistered(services);
             return services;
         }
         /// <summary>
@@ -82,7 +89,7 @@ namespace TimedBackgroundJob
                         Interval = attr.Interval,
                         PreventOverlap = attr.PreventOverlap
                     };
-                    registrations.Add(new TimedJobRegistration(type, options));
+                    registrations.Add(new TypeJobRegistration(type, options));
                     services.AddSingleton(type);
                 }
             }
@@ -93,17 +100,7 @@ namespace TimedBackgroundJob
                 services.AddSingleton<TimedJobRegistration>(sp => reg);
             }
 
-            // Ensure registry and hosted service are registered only once
-            var alreadyRegistered = services.Any(sd => sd.ServiceType == typeof(TimedJobRegistry));
-            if (!alreadyRegistered)
-            {
-                services.AddSingleton<TimedJobRegistry>(sp =>
-                {
-                    var regs = sp.GetServices<TimedJobRegistration>();
-                    return new TimedJobRegistry(regs);
-                });
-                services.AddHostedService<TimedJobHostedService>();
-            }
+            EnsureRegistryAndHostedServiceRegistered(services);
 
             // Log errors for misconfigured or duplicate jobs
             if (errors.Count > 0)
@@ -124,6 +121,24 @@ namespace TimedBackgroundJob
             }
 
             return services;
+        }
+
+        /// <summary>
+        /// Ensures that TimedJobRegistry and TimedJobHostedService are registered only once in the service collection.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        private static void EnsureRegistryAndHostedServiceRegistered(IServiceCollection services)
+        {
+            var alreadyRegistered = services.Any(sd => sd.ServiceType == typeof(TimedJobRegistry));
+            if (!alreadyRegistered)
+            {
+                services.AddSingleton<TimedJobRegistry>(sp =>
+                {
+                    var registrations = sp.GetServices<TimedJobRegistration>();
+                    return new TimedJobRegistry(registrations);
+                });
+                services.AddHostedService<TimedJobHostedService>();
+            }
         }
     }
 }

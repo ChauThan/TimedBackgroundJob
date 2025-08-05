@@ -12,7 +12,7 @@ namespace TimedBackgroundJob
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly TimedJobRegistry _registry;
         private readonly ILogger<TimedJobHostedService> _logger;
-        private readonly Dictionary<Type, bool> _jobRunning = new();
+        private readonly Dictionary<string, bool> _jobRunning = new();
 
 
         /// <summary>
@@ -41,29 +41,39 @@ namespace TimedBackgroundJob
         private async Task RunJobAsync(TimedJobRegistration registration, CancellationToken stoppingToken)
         {
             var options = registration.Options;
-            _jobRunning[registration.JobType] = false;
+            _jobRunning[registration.Id] = false;
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (options.PreventOverlap && _jobRunning[registration.JobType])
+                if (options.PreventOverlap && _jobRunning[registration.Id])
                 {
                     await Task.Delay(options.Interval, stoppingToken);
                     continue;
                 }
-                _jobRunning[registration.JobType] = true;
+                _jobRunning[registration.Id] = true;
                 try
                 {
                     using var scope = _scopeFactory.CreateScope();
-                    var job = (ITimedJob)scope.ServiceProvider.GetRequiredService(registration.JobType);
-                    await job.ExecuteAsync(stoppingToken);
+                    await registration.ExecuteAsync(scope.ServiceProvider, stoppingToken);
                 }
                 catch (Exception ex)
                 {
                     // Log error with job type and exception details for diagnostics and monitoring
-                    _logger.LogError(ex, "Error executing timed job {JobType}", registration.JobType.FullName);
+                    if (registration is TypeJobRegistration typeReg)
+                    {
+                        _logger.LogError(ex, "Error executing timed job {JobType}", typeReg.JobType.FullName);
+                    }
+                    else if (registration is DelegateJobRegistration)
+                    {
+                        _logger.LogError(ex, "Error executing delegate-based timed job");
+                    }
+                    else
+                    {
+                        _logger.LogError(ex, "Error executing unknown job type");
+                    }
                 }
                 finally
                 {
-                    _jobRunning[registration.JobType] = false;
+                    _jobRunning[registration.Id] = false;
                 }
                 await Task.Delay(options.Interval, stoppingToken);
             }
