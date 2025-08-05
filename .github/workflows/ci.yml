@@ -20,33 +20,48 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-      - name: Extract git tag (cross-platform)
-        id: get_tag
+      - name: Extract git tag (Windows)
+        id: get_tag_win
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $tag = git describe --tags --abbrev=0 2>$null
+          if (-not $tag) { $tag = '' }
+          Write-Host "Git tag: $tag"
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+      - name: Extract git tag (Unix)
+        id: get_tag_unix
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            pwsh -Command "
-              $tag = git describe --tags --abbrev=0 2>$null
-              if (-not $tag) { $tag = '' }
-              Write-Host \"Git tag: $tag\"
-              echo \"tag=$tag\" >> $env:GITHUB_OUTPUT
-            "
-          else
-            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-            echo "Git tag: $TAG"
-            echo "tag=$TAG" >> $GITHUB_OUTPUT
-          fi
-      - name: Fail if no valid tag for release build
-        if: github.ref_type == 'tag' && steps.get_tag.outputs.tag == ''
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "Git tag: $TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - name: Fail if no valid tag for release build (Windows)
+        if: github.ref_type == 'tag' && runner.os == 'Windows' && steps.get_tag_win.outputs.tag == ''
+        run: |
+          echo "No valid git tag found for release build. Failing."
+          exit 1
+      - name: Fail if no valid tag for release build (Unix)
+        if: github.ref_type == 'tag' && runner.os != 'Windows' && steps.get_tag_unix.outputs.tag == ''
         run: |
           echo "No valid git tag found for release build. Failing."
           exit 1
       - name: Restore dependencies
         run: dotnet restore TimedBackgroundJob.sln
-      - name: Build solution (inject version if tag present)
+      - name: Build solution (inject version if tag present, Windows)
+        if: runner.os == 'Windows'
         run: |
-          if [ "${{ steps.get_tag.outputs.tag }}" != "" ]; then \
-            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore /p:Version=${{ steps.get_tag.outputs.tag }}; \
+          if ($env:tag -ne "") {
+            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore /p:Version=$env:tag
+          } else {
+            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore
+          }
+      - name: Build solution (inject version if tag present, Unix)
+        if: runner.os != 'Windows'
+        run: |
+          if [ "${{ steps.get_tag_unix.outputs.tag }}" != "" ]; then \
+            dotnet build TimedBackgroundJob.sln --configuration Release --no-restore /p:Version=${{ steps.get_tag_unix.outputs.tag }}; \
           else \
             dotnet build TimedBackgroundJob.sln --configuration Release --no-restore; \
           fi
