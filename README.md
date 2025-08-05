@@ -62,8 +62,11 @@ services.AddTimedJob(options =>
 Add the NuGet package or reference the project, then register jobs in your ASP.NET Core app:
 
 ```csharp
-// Startup.cs or Program.cs
-services.AddTimedJobs();
+// Register the job in Startup.cs or Program.cs
+services.AddTimedJob<MyJob>(options =>
+{
+    options.Interval = TimeSpan.FromMinutes(5); // Runs every 5 minutes
+});
 ```
 
 Define a job:
@@ -71,12 +74,12 @@ Define a job:
 ```csharp
 using TimedBackgroundJob;
 
-[TimedJob("*/5 * * * *")] // Runs every 5 minutes
 public class MyJob : ITimedJob
 {
     public Task ExecuteAsync(CancellationToken cancellationToken)
     {
         // Job logic here
+        Console.WriteLine($"MyJob executed at {DateTime.Now:HH:mm:ss}");
         return Task.CompletedTask;
     }
 }
