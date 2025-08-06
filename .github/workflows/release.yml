@@ -21,8 +21,7 @@ jobs:
       - name: Update version in build file
         run: |
           TAG_VERSION=$(echo ${{ github.ref }} | sed 's/refs\/tags\/v//')
-          sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${TAG_VERSION}<\/VersionPrefix>/" Directory.Build.props
-          sed -i "s/<VersionSuffix>.*<\/VersionSuffix>/<VersionSuffix>release<\/VersionSuffix>/" Directory.Build.props
+          sed -i "s/<PackageVersion>.*<\/PackageVersion>/<PackageVersion>${TAG_VERSION}<\/PackageVersion>/" Directory.Build.props
       
       - name: Build and pack
         run: dotnet pack --configuration Release --output ./artifacts
